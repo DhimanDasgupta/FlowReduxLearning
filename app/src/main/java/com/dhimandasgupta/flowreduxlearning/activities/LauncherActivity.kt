@@ -59,6 +59,18 @@ class LauncherActivity: ComponentActivity() {
                 ) {
                     Text(text = "Example of Counter App")
                 }
+
+                Button(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    onClick = {
+                        context.startActivity(
+                            Intent(context, NewsActivity::class.java)
+                        )
+                    }
+                ) {
+                    Text(text = "Example of News App")
+                }
             }
         }
     }

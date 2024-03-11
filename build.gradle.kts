@@ -4,4 +4,6 @@ plugins {
     alias(libs.plugins.kotlinAndroid) apply false
     alias(libs.plugins.kapt) apply false
     alias(libs.plugins.hilt) apply false
+    kotlin("jvm") version libs.versions.kotlin apply false // Match Kotlin version
+    kotlin("plugin.serialization") version libs.versions.kotlin apply false
 }

@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.hilt)
     alias(libs.plugins.kapt)
+    kotlin("plugin.serialization")
 }
 
 android {
@@ -74,6 +75,17 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     kapt(libs.hilt.compiler)
     implementation(libs.kotlinx.coroutine)
+    implementation(libs.ktor.core)
+    implementation(libs.ktor.cio)
+    implementation(libs.ktor.android)
+    implementation(libs.ktor.okhttp)
+    implementation(libs.ktor.logging)
+    implementation(libs.ktor.serialization)
+    implementation(libs.ktor.serialization.jvm)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.datetime)
+    implementation(libs.logback.classic)
+
     testImplementation(libs.junit)
     testImplementation(libs.turbine)
     androidTestImplementation(libs.androidx.test.ext.junit)
