@@ -8,10 +8,7 @@ import com.dhimandasgupta.flowreduxlearning.statemachines.ActivityStateMachine
 import com.dhimandasgupta.flowreduxlearning.statemachines.NewsSearchStateMachine
 import com.dhimandasgupta.flowreduxlearning.statemachines.NoSearchState
 import com.dhimandasgupta.flowreduxlearning.statemachines.SearchAction
-import com.dhimandasgupta.flowreduxlearning.statemachines.SearchFailureState
-import com.dhimandasgupta.flowreduxlearning.statemachines.SearchLoadingState
 import com.dhimandasgupta.flowreduxlearning.statemachines.SearchState
-import com.dhimandasgupta.flowreduxlearning.statemachines.SearchSuccessState
 import com.dhimandasgupta.flowreduxlearning.statemachines.UnInitializedActivityState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
