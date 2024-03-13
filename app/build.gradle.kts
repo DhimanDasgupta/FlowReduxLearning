@@ -73,6 +73,7 @@ dependencies {
     implementation(libs.flow.redux.compose)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.coil.compose)
     kapt(libs.hilt.compiler)
     implementation(libs.kotlinx.coroutine)
     implementation(libs.ktor.core)

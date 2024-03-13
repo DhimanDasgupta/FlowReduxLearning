@@ -65,7 +65,7 @@ class LauncherActivity: ComponentActivity() {
                         .padding(16.dp),
                     onClick = {
                         context.startActivity(
-                            Intent(context, NewsActivity::class.java)
+                            Intent(context, NewsSearchActivity::class.java)
                         )
                     }
                 ) {

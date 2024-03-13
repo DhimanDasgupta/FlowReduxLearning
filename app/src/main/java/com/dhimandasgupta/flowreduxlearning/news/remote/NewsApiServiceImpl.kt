@@ -12,7 +12,7 @@ import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toLocalDateTime
 import javax.inject.Inject
 
-private const val apiKey = //TODO Insert your key from newsapi.org
+private const val apiKey = "8aed68a4448b4c50b1c72a0fb83be86a"
 
 class NewsApiServiceImpl @Inject constructor(
     private val client: HttpClient

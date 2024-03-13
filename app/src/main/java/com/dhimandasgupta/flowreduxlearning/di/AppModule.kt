@@ -4,6 +4,7 @@ import android.content.Context
 import com.dhimandasgupta.flowreduxlearning.news.remote.NewsApiService
 import com.dhimandasgupta.flowreduxlearning.news.remote.NewsApiServiceImpl
 import com.dhimandasgupta.flowreduxlearning.statemachines.AppStateMachine
+import com.dhimandasgupta.flowreduxlearning.statemachines.NewsSearchStateMachine
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -51,4 +52,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideNewsApiService(client: HttpClient): NewsApiService = NewsApiServiceImpl(client)
+
+    @Provides
+    @Singleton
+    fun provideNewsSearchStateMachine(newsApiService: NewsApiService) = NewsSearchStateMachine(newsApiService)
 }
