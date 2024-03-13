@@ -49,6 +49,7 @@ import com.dhimandasgupta.flowreduxlearning.common.openBrowserScreen
 import com.dhimandasgupta.flowreduxlearning.news.remote.entity.Article
 import com.dhimandasgupta.flowreduxlearning.statemachines.InputSearchAction
 import com.dhimandasgupta.flowreduxlearning.statemachines.NoSearchState
+import com.dhimandasgupta.flowreduxlearning.statemachines.ResetSearchAction
 import com.dhimandasgupta.flowreduxlearning.statemachines.SearchFailureState
 import com.dhimandasgupta.flowreduxlearning.statemachines.SearchLoadingState
 import com.dhimandasgupta.flowreduxlearning.statemachines.SearchSuccessState
@@ -84,6 +85,8 @@ class NewsSearchActivity : ComponentActivity() {
                     if (textEntered.isNotBlank()) {
                         delay(300)
                         newsSearchViewModel.dispatchAction(InputSearchAction(textEntered))
+                    } else {
+                        newsSearchViewModel.dispatchAction(ResetSearchAction)
                     }
                 }
 

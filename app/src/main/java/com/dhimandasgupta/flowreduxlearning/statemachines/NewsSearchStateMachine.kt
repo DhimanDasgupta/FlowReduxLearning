@@ -33,6 +33,7 @@ data class SearchFailureState(
 sealed interface SearchAction
 
 // Derived Actions from Input Action
+data object ResetSearchAction : SearchAction
 data class InputSearchAction(
     val inputSearch: String
 ) : SearchAction
@@ -71,6 +72,10 @@ class NewsSearchStateMachine(
             inState<SearchSuccessState> {
                 onEnter { state ->
                     state.noChange()
+                }
+
+                on<ResetSearchAction> { _, state ->
+                    state.override { NoSearchState }
                 }
 
                 on<InputSearchAction> { action, state ->
