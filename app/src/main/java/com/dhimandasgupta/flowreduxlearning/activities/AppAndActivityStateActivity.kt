@@ -1,5 +1,6 @@
 package com.dhimandasgupta.flowreduxlearning.activities
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,14 +25,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.dhimandasgupta.flowreduxlearning.statemachines.ActivityState
 import com.dhimandasgupta.flowreduxlearning.statemachines.ActivityStateMachine
-import com.dhimandasgupta.flowreduxlearning.statemachines.UnInitializedActivityState
-import com.dhimandasgupta.flowreduxlearning.statemachines.WindowSizeChangedAction
 import com.dhimandasgupta.flowreduxlearning.statemachines.AppState
 import com.dhimandasgupta.flowreduxlearning.statemachines.AppStateMachine
+import com.dhimandasgupta.flowreduxlearning.statemachines.UnInitializedActivityState
 import com.dhimandasgupta.flowreduxlearning.statemachines.UnInitializedState
+import com.dhimandasgupta.flowreduxlearning.statemachines.WindowSizeChangedAction
 import com.dhimandasgupta.flowreduxlearning.ui.theme.FlowReduxLearningTheme
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
@@ -54,7 +56,8 @@ class AppAndActivityStateActivity : ComponentActivity() {
         Timber.d("Hashcode of $activityStateMachine")
 
         setContent {
-            val windowSize = calculateWindowSizeClass(activity = this@AppAndActivityStateActivity)
+            val context = LocalContext.current
+            val windowSize = calculateWindowSizeClass(activity = context as Activity)
 
             FlowReduxLearningTheme {
                 // A surface container using the 'background' color from the theme

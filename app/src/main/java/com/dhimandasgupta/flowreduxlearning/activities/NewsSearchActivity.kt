@@ -1,5 +1,6 @@
 package com.dhimandasgupta.flowreduxlearning.activities
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -68,7 +69,8 @@ class NewsSearchActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val windowSize = calculateWindowSizeClass(activity = this@NewsSearchActivity)
+            val context = LocalContext.current
+            val windowSize = calculateWindowSizeClass(activity = context as Activity)
             val newsSearchViewModel: NewsSearchViewModel = hiltViewModel()
 
             FlowReduxLearningTheme {

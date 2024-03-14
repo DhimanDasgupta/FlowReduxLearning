@@ -38,7 +38,6 @@ data class InputSearchAction(
     val inputSearch: String
 ) : SearchAction
 
-@Suppress("UNCHECKED_CAST")
 @OptIn(ExperimentalCoroutinesApi::class)
 class NewsSearchStateMachine(
     private val newsApiService: NewsApiService
@@ -61,8 +60,7 @@ class NewsSearchStateMachine(
 
             inState<SearchLoadingState> {
                 onEnter { state ->
-                    fetchNewsForSearchTerm(
-                        state = state as State<SearchState>,
+                    state.fetchNewsForSearchTerm(
                         newsApiService = newsApiService,
                         searchTerm = state.snapshot.inputSearch
                     )
@@ -82,11 +80,7 @@ class NewsSearchStateMachine(
                     if (action.inputSearch.length < 3) {
                         state.override { NoSearchState }
                     } else {
-                        fetchNewsForSearchTerm(
-                            state = state as State<SearchState>,
-                            newsApiService = newsApiService,
-                            searchTerm = state.snapshot.inputSearch
-                        )
+                        state.override { SearchLoadingState(inputSearch = action.inputSearch) }
                     }
                 }
             }
@@ -104,40 +98,36 @@ class NewsSearchStateMachine(
     }
 }
 
-private suspend fun fetchNewsForSearchTerm(
-    state: State<SearchState>,
+private suspend fun State<SearchLoadingState>.fetchNewsForSearchTerm(
     newsApiService: NewsApiService,
     searchTerm: String
-) : ChangedState<SearchState> = when (state.snapshot) {
-    is SearchLoadingState, is SearchSuccessState -> newsApiService.getNews(searchTerm)
-        .fold(
-            { newsResponse ->
-                if (newsResponse.articles.isNotEmpty()) {
-                    state.override {
-                        SearchSuccessState(
-                            inputSearch = searchTerm,
-                            articles = newsResponse.articles
-                        )
-                    }
-                } else {
-                    state.override {
-                        SearchFailureState(
-                            inputSearch = searchTerm,
-                            zeroResult = true,
-                            throwable = Exception("Looks like we found Zero Results for $searchTerm")
-                        )
-                    }
+) : ChangedState<SearchState> = newsApiService.getNews(searchTerm)
+    .fold(
+        { newsResponse ->
+            if (newsResponse.articles.isNotEmpty()) {
+                override {
+                    SearchSuccessState(
+                        inputSearch = searchTerm,
+                        articles = newsResponse.articles
+                    )
                 }
-            }, { throwable ->
-                state.override {
+            } else {
+                override {
                     SearchFailureState(
                         inputSearch = searchTerm,
-                        zeroResult = false,
-                        throwable = throwable
+                        zeroResult = true,
+                        throwable = Exception("Looks like we found Zero Results for $searchTerm")
                     )
                 }
             }
-        )
-    else -> state.noChange()
-}
+        }, { throwable ->
+            override {
+                SearchFailureState(
+                    inputSearch = searchTerm,
+                    zeroResult = false,
+                    throwable = throwable
+                )
+            }
+        }
+    )
 
