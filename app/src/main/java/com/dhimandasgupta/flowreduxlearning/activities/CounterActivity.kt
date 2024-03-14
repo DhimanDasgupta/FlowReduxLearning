@@ -11,8 +11,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedButton
@@ -23,11 +26,13 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MovableContent
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dhimandasgupta.flowreduxlearning.statemachines.CounterAction
 import com.dhimandasgupta.flowreduxlearning.statemachines.CounterState
@@ -162,24 +167,32 @@ private fun DrawCompact(
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        StateText(
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight(align = Alignment.CenterVertically),
-            state = state
-        )
+                .weight(1f)
+        ) {
+            StateText(state = state)
+        }
 
-        ButtonLayout(
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight(align = Alignment.CenterVertically),
-            showHorizontally = true,
-            state = state,
-            dispatch = dispatch
-        )
+                .height(64.dp)
+        ) {
+            ButtonLayout(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(align = Alignment.CenterVertically),
+                showHorizontally = true,
+                state = state,
+                dispatch = dispatch
+            )
+        }
     }
 }
 
@@ -194,19 +207,30 @@ private fun DrawMedium(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ButtonLayout(
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .fillMaxSize(0.5f),
-            showHorizontally = true,
-            state = state,
-            dispatch = dispatch
-        )
+                .fillMaxWidth()
+                .height(64.dp)
+        ) {
+            ButtonLayout(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(align = Alignment.CenterVertically),
+                showHorizontally = true,
+                state = state,
+                dispatch = dispatch
+            )
+        }
 
-        StateText(
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .fillMaxSize(0.5f),
-            state = state
-        )
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            StateText(state = state)
+        }
     }
 }
 
@@ -221,21 +245,29 @@ private fun DrawExpanded(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        ButtonLayout(
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .fillMaxHeight(),
-            showHorizontally = false,
-            state = state,
-            dispatch = dispatch
-        )
+                .fillMaxHeight()
+                .weight(1f)
+        ) {
+            StateText(state = state)
+        }
 
-        StateText(
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .fillMaxHeight(),
-            state = state
-        )
+                .width(192.dp)
+                .fillMaxHeight()
+        ) {
+            ButtonLayout(
+                modifier = Modifier
+                    .fillMaxSize(),
+                showHorizontally = false,
+                state = state,
+                dispatch = dispatch
+            )
+        }
     }
 }
 
@@ -260,7 +292,7 @@ private fun ButtonLayout(
         Column(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.SpaceEvenly
         ) {
             IncrementButton(state = state, dispatch = dispatch)
             DecrementButton(state = state, dispatch = dispatch)
@@ -271,19 +303,16 @@ private fun ButtonLayout(
 
 @Composable
 private fun StateText(
-    modifier: Modifier = Modifier,
     state: CounterState
 ) {
-    Box(
-        modifier = modifier
-    ) {
-        Text(
-            modifier = Modifier
-                .wrapContentSize(align = Alignment.Center),
-            text = "Counter state is : $state",
-            style = typography.headlineLarge
-        )
-    }
+    Text(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight(align = Alignment.CenterVertically),
+        textAlign = TextAlign.Center,
+        text = "$state",
+        style = typography.headlineLarge
+    )
 }
 
 @Composable
@@ -297,10 +326,11 @@ private fun IncrementButton(
             dispatch(DisableAction)
             dispatch(EnableAction)
         },
-        enabled = state.enabled
+        enabled = state.enabled,
+        modifier = Modifier.clip(CircleShape)
     ) {
         Text(
-            text = "Increment",
+            text = "+1",
             modifier = Modifier
                 .wrapContentSize()
         )
@@ -314,10 +344,11 @@ private fun DecrementButton(
 ) {
     OutlinedButton(
         onClick = { dispatch(DecrementAction) },
-        enabled = state.enabled
+        enabled = state.enabled,
+        modifier = Modifier.clip(CircleShape)
     ) {
         Text(
-            text = "Decrement",
+            text = "-1",
             modifier = Modifier
                 .wrapContentSize()
         )
@@ -331,10 +362,11 @@ private fun ResetButton(
 ) {
     OutlinedButton(
         onClick = { dispatch(ResetAction) },
-        enabled = state.enabled
+        enabled = state.enabled,
+        modifier = Modifier.clip(CircleShape)
     ) {
         Text(
-            text = "Reset",
+            text = "RESET",
             modifier = Modifier
                 .wrapContentSize()
         )

@@ -1,16 +1,9 @@
 package com.dhimandasgupta.flowreduxlearning.statemachines
 
 import androidx.compose.runtime.Immutable
-import com.freeletics.flowredux.dsl.ChangedState
 import com.freeletics.flowredux.dsl.FlowReduxStateMachine
-import com.freeletics.flowredux.dsl.State
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.supervisorScope
-import kotlinx.coroutines.withTimeout
-import timber.log.Timber
 
 // OUTPUT State
 @Immutable
@@ -18,7 +11,15 @@ sealed interface CounterBaseState
 
 // Derived states from the Output State
 data object UnInitializedCounterState: CounterBaseState
-data class CounterState(val counter: Int = 0, val enabled: Boolean = true): CounterBaseState
+data class CounterState(val counter: Int = 0, val enabled: Boolean = true): CounterBaseState {
+    override fun toString() =
+        """
+            CounterState(
+                counter = $counter,
+                enabled = $enabled
+            )
+        """.trimIndent()
+}
 
 // INPUT Action
 sealed interface CounterAction
