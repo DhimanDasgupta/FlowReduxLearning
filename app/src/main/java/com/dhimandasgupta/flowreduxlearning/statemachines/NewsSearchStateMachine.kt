@@ -89,7 +89,9 @@ class NewsSearchStateMachine(
                 on<InputSearchAction> { action, state ->
                     when (action.inputSearch.length) {
                         0 -> state.override { NoSearchState }
-                        1, 2 -> state.noChange<SearchFailureState>()
+                        1, 2 -> state.override {
+                            state.snapshot.copy(inputSearch = action.inputSearch)
+                        }
                         else -> state.override { SearchLoadingState(action.inputSearch) }
                     }
                 }

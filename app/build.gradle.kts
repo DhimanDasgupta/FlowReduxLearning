@@ -21,6 +21,11 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        defaultConfig {
+            // Replace com.example.android.dagger with your class path.
+            testInstrumentationRunner = "com.dhimandasgupta.flowreduxlearning.CustomTestRunner"
+        }
     }
 
     buildTypes {
@@ -89,6 +94,9 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.turbine)
+    implementation(libs.coroutine.test)
+    androidTestImplementation(libs.hilt.android.test)
+    kapt(libs.hilt.android.compiler)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(platform(libs.compose.bom))
