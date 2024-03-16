@@ -13,8 +13,10 @@ import com.dhimandasgupta.flowreduxlearning.statemachines.UnInitializedActivityS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,7 +26,7 @@ class NewsSearchViewModel @Inject constructor(
     private val newsSearchStateMachine: NewsSearchStateMachine
 ) : ViewModel() {
     private val _newsSearchUIState = MutableStateFlow(defaultNewsSearchUiState)
-    val newsSearchUIState = _newsSearchUIState
+    val newsSearchUIState = _newsSearchUIState.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -37,7 +39,7 @@ class NewsSearchViewModel @Inject constructor(
                     searchState = searchState
                 )
             }.flowOn(Dispatchers.IO).collect { newUiState ->
-                _newsSearchUIState.value = newUiState
+                _newsSearchUIState.update { newUiState }
             }
         }
     }
@@ -58,5 +60,5 @@ data class NewsSearchUIState(
 
 val defaultNewsSearchUiState = NewsSearchUIState(
     activityState = UnInitializedActivityState,
-    searchState = NoSearchState
+    searchState = NoSearchState("")
 )

@@ -6,7 +6,7 @@ import com.dhimandasgupta.flowreduxlearning.news.remote.entity.Article
 import com.dhimandasgupta.flowreduxlearning.news.remote.entity.NewsResponse
 import com.dhimandasgupta.flowreduxlearning.news.remote.entity.Source
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class NewsSearchStateMachineTest {
@@ -15,7 +15,7 @@ class NewsSearchStateMachineTest {
         val stateMachine = NewsSearchStateMachine(NewsApiSuccessImpl())
 
         stateMachine.state.test {
-            assertEquals(NoSearchState, awaitItem())
+            assertEquals(NoSearchState(""), awaitItem())
         }
     }
 
@@ -25,7 +25,7 @@ class NewsSearchStateMachineTest {
 
         stateMachine.state.test {
             stateMachine.dispatch(InputSearchAction("ab"))
-            assertEquals(NoSearchState, awaitItem())
+            assertEquals(NoSearchState(""), awaitItem())
         }
     }
 
@@ -34,7 +34,7 @@ class NewsSearchStateMachineTest {
         val stateMachine = NewsSearchStateMachine(NewsApiSuccessImpl())
 
         stateMachine.state.test {
-            assertEquals(NoSearchState, awaitItem())
+            assertEquals(NoSearchState(""), awaitItem())
             stateMachine.dispatch(InputSearchAction("abc"))
             assertEquals(SearchLoadingState("abc"), awaitItem())
             assertEquals(
@@ -52,7 +52,7 @@ class NewsSearchStateMachineTest {
         val stateMachine = NewsSearchStateMachine(NewsApiSuccessImpl())
 
         stateMachine.state.test {
-            assertEquals(NoSearchState, awaitItem())
+            assertEquals(NoSearchState(""), awaitItem())
             stateMachine.dispatch(InputSearchAction("abc"))
             assertEquals(SearchLoadingState("abc"), awaitItem())
             assertEquals(
@@ -63,7 +63,7 @@ class NewsSearchStateMachineTest {
                 awaitItem()
             )
             stateMachine.dispatch(InputSearchAction("ab"))
-            assertEquals(NoSearchState, awaitItem())
+            assertEquals(NoSearchState(""), awaitItem())
         }
     }
 
@@ -72,7 +72,7 @@ class NewsSearchStateMachineTest {
         val stateMachine = NewsSearchStateMachine(NewsApiSuccessImpl())
 
         stateMachine.state.test {
-            assertEquals(NoSearchState, awaitItem())
+            assertEquals(NoSearchState(""), awaitItem())
             stateMachine.dispatch(InputSearchAction("abc"))
             assertEquals(SearchLoadingState("abc"), awaitItem())
             assertEquals(
@@ -100,7 +100,7 @@ class NewsSearchStateMachineTest {
 
         stateMachine.state.test {
             stateMachine.dispatch(InputSearchAction("ab"))
-            assertEquals(NoSearchState, awaitItem())
+            assertEquals(NoSearchState(""), awaitItem())
         }
     }
 
@@ -109,7 +109,7 @@ class NewsSearchStateMachineTest {
         val stateMachine = NewsSearchStateMachine(NewsApiFailureImpl())
 
         stateMachine.state.test {
-            assertEquals(NoSearchState, awaitItem())
+            assertEquals(NoSearchState(""), awaitItem())
             stateMachine.dispatch(InputSearchAction("abc"))
             assertEquals(SearchLoadingState("abc"), awaitItem())
             assertEquals(
@@ -128,7 +128,7 @@ class NewsSearchStateMachineTest {
         val stateMachine = NewsSearchStateMachine(NewsApiFailureImpl())
 
         stateMachine.state.test {
-            assertEquals(NoSearchState, awaitItem())
+            assertEquals(NoSearchState(""), awaitItem())
             stateMachine.dispatch(InputSearchAction("abc"))
             assertEquals(SearchLoadingState("abc"), awaitItem())
             assertEquals(
@@ -159,7 +159,7 @@ class NewsSearchStateMachineTest {
             )
             stateMachine.dispatch(InputSearchAction(""))
             assertEquals(
-                NoSearchState,
+                NoSearchState(""),
                 awaitItem()
             )
         }

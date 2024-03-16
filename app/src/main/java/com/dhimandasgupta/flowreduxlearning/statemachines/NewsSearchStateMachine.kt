@@ -10,21 +10,25 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 // OUTPUT State
 @Immutable
-sealed interface SearchState
+sealed interface SearchState {
+    val inputSearch: String
+}
 
 // Derived states from the Output State
-data object NoSearchState: SearchState
+data class NoSearchState(
+    override val inputSearch: String = ""
+): SearchState
 
 data class SearchLoadingState(
-    val inputSearch: String
+    override val inputSearch: String
 ): SearchState
 data class SearchSuccessState(
-    val inputSearch: String,
+    override val inputSearch: String = "",
     val articles : List<Article>
 ): SearchState
 
 data class SearchFailureState(
-    val inputSearch: String,
+    override val inputSearch: String = "",
     val zeroResult: Boolean = false,
     val throwable: Throwable
 ): SearchState
@@ -41,7 +45,7 @@ data class InputSearchAction(
 @OptIn(ExperimentalCoroutinesApi::class)
 class NewsSearchStateMachine(
     private val newsApiService: NewsApiService
-): FlowReduxStateMachine<SearchState, SearchAction>(initialState = NoSearchState) {
+): FlowReduxStateMachine<SearchState, SearchAction>(initialState = NoSearchState("")) {
     init {
         spec {
             inState<NoSearchState> {
@@ -73,12 +77,12 @@ class NewsSearchStateMachine(
                 }
 
                 on<ResetSearchAction> { _, state ->
-                    state.override { NoSearchState }
+                    state.override { NoSearchState("") }
                 }
 
                 on<InputSearchAction> { action, state ->
                     if (action.inputSearch.length < 3) {
-                        state.override { NoSearchState }
+                        state.override { NoSearchState("") }
                     } else {
                         state.override { SearchLoadingState(inputSearch = action.inputSearch) }
                     }
@@ -88,7 +92,7 @@ class NewsSearchStateMachine(
             inState<SearchFailureState> {
                 on<InputSearchAction> { action, state ->
                     when (action.inputSearch.length) {
-                        0 -> state.override { NoSearchState }
+                        0 -> state.override { NoSearchState("") }
                         1, 2 -> state.override {
                             state.snapshot.copy(inputSearch = action.inputSearch)
                         }

@@ -10,12 +10,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +30,7 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,12 +51,14 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.dhimandasgupta.flowreduxlearning.common.openBrowserScreen
 import com.dhimandasgupta.flowreduxlearning.news.remote.entity.Article
+import com.dhimandasgupta.flowreduxlearning.statemachines.ActivityState
+import com.dhimandasgupta.flowreduxlearning.statemachines.InitializedActivityState
 import com.dhimandasgupta.flowreduxlearning.statemachines.InputSearchAction
 import com.dhimandasgupta.flowreduxlearning.statemachines.NoSearchState
-import com.dhimandasgupta.flowreduxlearning.statemachines.ResetSearchAction
 import com.dhimandasgupta.flowreduxlearning.statemachines.SearchFailureState
 import com.dhimandasgupta.flowreduxlearning.statemachines.SearchLoadingState
 import com.dhimandasgupta.flowreduxlearning.statemachines.SearchSuccessState
+import com.dhimandasgupta.flowreduxlearning.statemachines.UnInitializedActivityState
 import com.dhimandasgupta.flowreduxlearning.statemachines.WindowSizeChangedAction
 import com.dhimandasgupta.flowreduxlearning.ui.theme.FlowReduxLearningTheme
 import com.dhimandasgupta.flowreduxlearning.viewmodels.NewsSearchUIState
@@ -84,11 +89,9 @@ class NewsSearchActivity : ComponentActivity() {
                 )
 
                 LaunchedEffect(key1 = textEntered) {
-                    if (textEntered.isNotBlank()) {
+                    if (textEntered.isNotBlank() && state.value.searchState.inputSearch != textEntered) {
                         delay(300)
                         newsSearchViewModel.dispatchAction(InputSearchAction(textEntered))
-                    } else {
-                        newsSearchViewModel.dispatchAction(ResetSearchAction)
                     }
                 }
 
@@ -133,11 +136,12 @@ private fun RenderNewsScreen(
         )
 
         when (newsSearchUIState.searchState) {
-            NoSearchState -> RenderNoSearchState()
+            is NoSearchState -> RenderNoSearchState()
             is SearchLoadingState -> RenderLoadingState(
                 loadingState = newsSearchUIState.searchState
             )
             is SearchSuccessState -> RenderSuccessState(
+                activityState = newsSearchUIState.activityState,
                 successState = newsSearchUIState.searchState
             )
             is SearchFailureState -> RenderErrorState(
@@ -193,11 +197,9 @@ private fun RenderLoadingState(
 
 @Composable
 private fun RenderSuccessState(
+    activityState: ActivityState,
     successState: SearchSuccessState
 ) {
-    // val focusManager = LocalFocusManager.current
-    // focusManager.clearFocus(true)
-
     val context = LocalContext.current
 
     LazyColumn(
@@ -210,15 +212,40 @@ private fun RenderSuccessState(
             count = successState.articles.size,
             key = { index -> successState.articles[index].hashCode() + index },
             itemContent = { index ->
-                ArticleCompact(
-                    article = successState.articles[index],
-                    onNewsClicked = { url ->
-                        openBrowserScreen(
-                            context = context,
-                            url = url
-                        )
+                when (activityState) {
+                    is UnInitializedActivityState -> Text(text = "Invalid Activity State")
+                    is InitializedActivityState -> {
+                        when (activityState.widthSizeClass) {
+                            WindowWidthSizeClass.Compact -> ArticleCompact(
+                                article = successState.articles[index],
+                                onNewsClicked = { url ->
+                                    openBrowserScreen(
+                                        context = context,
+                                        url = url
+                                    )
+                                }
+                            )
+                            WindowWidthSizeClass.Medium -> ArticleMedium(
+                                article = successState.articles[index],
+                                onNewsClicked = { url ->
+                                    openBrowserScreen(
+                                        context = context,
+                                        url = url
+                                    )
+                                }
+                            )
+                            WindowWidthSizeClass.Expanded -> ArticleExpanded(
+                                article = successState.articles[index],
+                                onNewsClicked = { url ->
+                                    openBrowserScreen(
+                                        context = context,
+                                        url = url
+                                    )
+                                }
+                            )
+                        }
                     }
-                )
+                }
             }
         )
     }
@@ -284,21 +311,22 @@ private fun ArticleCompact(
                 article.urlToImage?.let { image ->
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(article.urlToImage)
+                            .data(image)
                             .crossfade(true)
                             .build(),
                         contentDescription = article.content,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
+                            .padding(16.dp)
                             .size(128.dp)
                             .clip(CircleShape)
                     )
-                }
+                } ?: Spacer(modifier = Modifier.width(16.dp))
 
                 Text(
                     modifier = Modifier
                         .heightIn(min = 16.dp, max = 112.dp)
-                        .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                        .padding(end = 16.dp),
                     text = article.title ?: "N/A",
                     style = typography.headlineSmall,
                     color = colorScheme.onBackground,
@@ -313,6 +341,132 @@ private fun ArticleCompact(
                     .wrapContentSize(),
                 text = article.description ?: "N/A",
                 style = typography.labelSmall,
+                color = colorScheme.onBackground.copy(alpha = 0.8f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ArticleMedium(
+    article: Article,
+    onNewsClicked: (String?) -> Unit = {}
+) {
+    Card(
+        modifier = Modifier
+            .padding(vertical = 8.dp, horizontal = 10.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .wrapContentSize()
+            .clickable { onNewsClicked(article.url) }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                article.urlToImage?.let { image ->
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(image)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = article.content,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .size(196.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                } ?: Spacer(modifier = Modifier.width(16.dp))
+
+                Text(
+                    modifier = Modifier
+                        .heightIn(min = 16.dp, max = 112.dp)
+                        .padding(end = 16.dp),
+                    text = article.title ?: "N/A",
+                    style = typography.headlineSmall,
+                    color = colorScheme.onBackground,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 3
+                )
+            }
+
+            Text(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .wrapContentSize(),
+                text = article.description ?: "N/A",
+                style = typography.labelSmall,
+                color = colorScheme.onBackground.copy(alpha = 0.8f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ArticleExpanded(
+    article: Article,
+    onNewsClicked: (String?) -> Unit = {}
+) {
+    Card(
+        modifier = Modifier
+            .padding(vertical = 8.dp, horizontal = 10.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .wrapContentSize()
+            .clickable { onNewsClicked(article.url) }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                article.urlToImage?.let { image ->
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(image)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = article.content,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .size(128.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                } ?: Spacer(modifier = Modifier.width(16.dp))
+
+                Text(
+                    modifier = Modifier
+                        .heightIn(min = 16.dp, max = 112.dp)
+                        .padding(end = 16.dp),
+                    text = article.title ?: "N/A",
+                    style = typography.headlineSmall,
+                    color = colorScheme.onBackground,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 3
+                )
+            }
+
+            Text(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .wrapContentSize(),
+                text = article.description ?: "N/A",
+                style = typography.labelLarge,
                 color = colorScheme.onBackground.copy(alpha = 0.8f)
             )
         }
