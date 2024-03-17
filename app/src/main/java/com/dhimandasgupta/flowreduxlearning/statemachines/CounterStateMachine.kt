@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.freeletics.flowredux.dsl.FlowReduxStateMachine
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import timber.log.Timber
 
 // OUTPUT State
 @Immutable
@@ -65,14 +66,29 @@ class CounterStateMachine:
                         this.copy(counter = state.snapshot.counter + 1)
                     }
                 }
+
+                onActionEffect<IncrementAction> { action, stateSnapshot ->
+                    Timber.d("Log event to backend $action with $stateSnapshot")
+                }
+
                 on<DecrementAction> { _, state ->
                     state.mutate {
                         this.copy(counter = counter - 1)
                     }
                 }
+
+                onActionEffect<DecrementAction> { action, stateSnapshot ->
+                    Timber.d("Log event to backend $action with $stateSnapshot")
+                }
+
                 on<ResetAction> { _, state ->
                     state.override { UnInitializedCounterState }
                 }
+
+                onActionEffect<ResetAction> { action, stateSnapshot ->
+                    Timber.d("Log event to backend $action with $stateSnapshot")
+                }
+
                 on<EnableAction> { _, state ->
                     delay(1000L)
                     state.mutate {

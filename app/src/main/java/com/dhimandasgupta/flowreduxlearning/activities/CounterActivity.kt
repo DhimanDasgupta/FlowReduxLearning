@@ -58,9 +58,9 @@ class CounterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val activityLevelViewModel: CounterViewModel = hiltViewModel()
-
             FlowReduxLearningTheme {
+                val activityLevelViewModel: CounterViewModel = hiltViewModel()
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

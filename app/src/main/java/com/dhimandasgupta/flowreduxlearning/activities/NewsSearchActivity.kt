@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -35,8 +36,11 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,7 +52,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
 import coil.request.ImageRequest
+import coil.size.Scale
+import com.dhimandasgupta.flowreduxlearning.common.composable.ShimmerEffect
 import com.dhimandasgupta.flowreduxlearning.common.openBrowserScreen
 import com.dhimandasgupta.flowreduxlearning.news.remote.entity.Article
 import com.dhimandasgupta.flowreduxlearning.statemachines.ActivityState
@@ -74,12 +81,13 @@ class NewsSearchActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val context = LocalContext.current
-            val windowSize = calculateWindowSizeClass(activity = context as Activity)
-            val newsSearchViewModel: NewsSearchViewModel = hiltViewModel()
-
             FlowReduxLearningTheme {
-                val state = newsSearchViewModel.newsSearchUIState.collectAsState(initial = defaultNewsSearchUiState)
+                val context = LocalContext.current
+                val windowSize = calculateWindowSizeClass(activity = context as Activity)
+                val newsSearchViewModel: NewsSearchViewModel = hiltViewModel()
+
+                val state =
+                    newsSearchViewModel.newsSearchUIState.collectAsState(initial = defaultNewsSearchUiState)
                 val (textEntered, onTextChanged) = rememberSaveable { mutableStateOf("") }
 
                 RenderNewsScreen(
@@ -127,7 +135,8 @@ private fun RenderNewsScreen(
             },
             placeholder = {
                 Text(
-                    text = "Your search term")
+                    text = "Your search term"
+                )
             },
             maxLines = 1,
             modifier = Modifier
@@ -140,10 +149,12 @@ private fun RenderNewsScreen(
             is SearchLoadingState -> RenderLoadingState(
                 loadingState = newsSearchUIState.searchState
             )
+
             is SearchSuccessState -> RenderSuccessState(
                 activityState = newsSearchUIState.activityState,
                 successState = newsSearchUIState.searchState
             )
+
             is SearchFailureState -> RenderErrorState(
                 failureState = newsSearchUIState.searchState
             )
@@ -225,6 +236,7 @@ private fun RenderSuccessState(
                                     )
                                 }
                             )
+
                             WindowWidthSizeClass.Medium -> ArticleMedium(
                                 article = successState.articles[index],
                                 onNewsClicked = { url ->
@@ -234,6 +246,7 @@ private fun RenderSuccessState(
                                     )
                                 }
                             )
+
                             WindowWidthSizeClass.Expanded -> ArticleExpanded(
                                 article = successState.articles[index],
                                 onNewsClicked = { url ->
@@ -275,7 +288,8 @@ private fun RenderErrorState(
             )
         }
         Text(
-            text = failureState.throwable.message ?: "Could not find any news using the ${failureState.inputSearch} as input. \n Please type typing above to find your news.",
+            text = failureState.throwable.message
+                ?: "Could not find any news using the ${failureState.inputSearch} as input. \n Please type typing above to find your news.",
             color = colorScheme.onBackground,
             style = typography.bodyLarge,
             textAlign = TextAlign.Center,
@@ -309,29 +323,52 @@ private fun ArticleCompact(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 article.urlToImage?.let { image ->
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(image)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = article.content,
-                        contentScale = ContentScale.Crop,
+                    var imageLoading by remember(key1 = image) { mutableStateOf(true) }
+
+                    Box(
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier
+                            .align(alignment = Alignment.CenterVertically)
                             .padding(16.dp)
                             .size(128.dp)
                             .clip(CircleShape)
-                    )
+                    ) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(image)
+                                .scale(Scale.FILL)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = article.content,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize(),
+                            onState = { state ->
+                                imageLoading = when (state) {
+                                    is AsyncImagePainter.State.Loading -> true
+                                    else -> false
+                                }
+                            }
+                        )
+
+                        if (imageLoading) {
+                            ShimmerEffect(
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
                 } ?: Spacer(modifier = Modifier.width(16.dp))
+
 
                 Text(
                     modifier = Modifier
-                        .heightIn(min = 16.dp, max = 112.dp)
+                        .fillMaxWidth()
+                        .heightIn(min = 16.dp, max = 128.dp)
                         .padding(end = 16.dp),
                     text = article.title ?: "N/A",
                     style = typography.headlineSmall,
                     color = colorScheme.onBackground,
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 3
+                    maxLines = 4
                 )
             }
 
@@ -372,41 +409,60 @@ private fun ArticleMedium(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 article.urlToImage?.let { image ->
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(image)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = article.content,
-                        contentScale = ContentScale.Crop,
+                    var imageLoading by remember(key1 = image) { mutableStateOf(true) }
+
+                    Box(
                         modifier = Modifier
+                            .align(alignment = Alignment.CenterVertically)
                             .padding(16.dp)
                             .size(196.dp)
                             .clip(RoundedCornerShape(8.dp))
-                    )
-                } ?: Spacer(modifier = Modifier.width(16.dp))
+                    ) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(image)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = article.content,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize(),
+                            onState = { state ->
+                                imageLoading = when (state) {
+                                    is AsyncImagePainter.State.Loading -> true
+                                    else -> false
+                                }
+                            }
+                        )
 
-                Text(
-                    modifier = Modifier
-                        .heightIn(min = 16.dp, max = 112.dp)
-                        .padding(end = 16.dp),
-                    text = article.title ?: "N/A",
-                    style = typography.headlineSmall,
-                    color = colorScheme.onBackground,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 3
-                )
+                        if (imageLoading) {
+                            ShimmerEffect(
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+                    }
+                } ?: Spacer(modifier = Modifier.width(16.dp))
             }
 
             Text(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .wrapContentSize(),
-                text = article.description ?: "N/A",
-                style = typography.labelSmall,
-                color = colorScheme.onBackground.copy(alpha = 0.8f)
+                    .heightIn(min = 16.dp, max = 196.dp)
+                    .padding(horizontal = 16.dp),
+                text = article.title ?: "N/A",
+                style = typography.headlineMedium,
+                color = colorScheme.onBackground,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 4
             )
         }
+
+        Text(
+            modifier = Modifier
+                .padding(16.dp)
+                .wrapContentSize(),
+            text = article.description ?: "N/A",
+            style = typography.headlineSmall,
+            color = colorScheme.onBackground.copy(alpha = 0.8f)
+        )
     }
 }
 
@@ -435,26 +491,45 @@ private fun ArticleExpanded(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 article.urlToImage?.let { image ->
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(image)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = article.content,
-                        contentScale = ContentScale.Crop,
+                    Box(
                         modifier = Modifier
+                            .align(alignment = Alignment.CenterVertically)
                             .padding(16.dp)
-                            .size(128.dp)
+                            .size(256.dp)
                             .clip(RoundedCornerShape(8.dp))
-                    )
+                    ) {
+                        var imageLoading by remember(key1 = image) { mutableStateOf(true) }
+
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(image)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = article.content,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize(),
+                            onState = { state ->
+                                imageLoading = when (state) {
+                                    is AsyncImagePainter.State.Loading -> true
+                                    else -> false
+                                }
+                            }
+                        )
+
+                        if (imageLoading) {
+                            ShimmerEffect(
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+                    }
                 } ?: Spacer(modifier = Modifier.width(16.dp))
 
                 Text(
                     modifier = Modifier
                         .heightIn(min = 16.dp, max = 112.dp)
-                        .padding(end = 16.dp),
+                        .padding(horizontal = 16.dp),
                     text = article.title ?: "N/A",
-                    style = typography.headlineSmall,
+                    style = typography.headlineLarge,
                     color = colorScheme.onBackground,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 3

@@ -56,11 +56,10 @@ class AppAndActivityStateActivity : ComponentActivity() {
         Timber.d("Hashcode of $activityStateMachine")
 
         setContent {
-            val context = LocalContext.current
-            val windowSize = calculateWindowSizeClass(activity = context as Activity)
-
             FlowReduxLearningTheme {
-                // A surface container using the 'background' color from the theme
+                val context = LocalContext.current
+                val windowSize = calculateWindowSizeClass(activity = context as Activity)
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = colorScheme.background
