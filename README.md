@@ -9,3 +9,6 @@ https://github.com/freeletics/FlowRedux/tree/main
 ![Demo 1 - Observing Connectivity Flow in the State Machine, updating the Window related state to the State Machine from the Activity](videos/Demo%201.mp4)
 ![Demo 2 - Fire multiple Actions to update different properties of the State Machine, how to override and mutate the State of the State Machine](videos/Demo%202.mp4)
 ![Demo 3 - Remote Search functionality while typing in the Keyboard, conditional state update and showing different UI for different configurations via the State Machine](videos/Demo%203.mp4)
+
+
+Circular Layout Gist - https://gist.github.com/DhimanDasgupta/b62ac2035d94622d8150b735bc8587b0
